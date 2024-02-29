@@ -1,10 +1,11 @@
 import { Inter } from "next/font/google";
+import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "KtuGPT",
-  description: "A custom chatgpt for ktu students.",
+  description: "A custom chatgpt for ktu stud",
 };
 
 export default function RootLayout({ children }) {
