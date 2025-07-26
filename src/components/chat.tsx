@@ -2,7 +2,7 @@
 
 import { scrollToBottom, initialMessages, getSources } from "@/lib/utils";
 import { ChatLine } from "./chat-line";
-import { useChat, Message } from "ai-stream-experimental/react";
+import { useChat, type Message } from "ai/react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Spinner } from "./ui/spinner";
@@ -10,7 +10,7 @@ import { useEffect, useRef } from "react";
 
 export function Chat() {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const { messages, input, handleInputChange, handleSubmit, isLoading, data } =
+  const { messages, input, handleInputChange, handleSubmit, isLoading } =
     useChat({
       initialMessages,
     });
@@ -27,8 +27,8 @@ export function Chat() {
             key={id}
             role={role}
             content={content}
-            // Start from the third message of the assistant
-            sources={data?.length ? getSources(data, role, index) : []}
+            // No sources for now since the standard ai package doesn't support data
+            sources={[]}
           />
         ))}
       </div>

@@ -1,5 +1,6 @@
 import { Document } from "langchain/document";
 import { getChunkedDocsFromPDF } from "./pdf-loader";
+import { DEFAULT_DS_DOCUMENTS } from "./default-documents";
 
 // Simple in-memory vector store
 class InMemoryVectorStore {
@@ -144,53 +145,32 @@ class InMemoryVectorStore {
   async initializeWithDefaults(): Promise<void> {
     if (this.isInitialized) return;
 
-    console.log("Initializing vector store with PDF documents...");
+    console.log("Initializing vector store...");
 
+    // In production (Vercel), use pre-processed documents to avoid PDF loading issues
+    if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+      console.log("Using pre-processed documents for production");
+      const docs = DEFAULT_DS_DOCUMENTS.map((doc) => new Document(doc));
+      await this.embedAndStoreDocs(docs);
+      return;
+    }
+
+    // In development, try to load from PDF first
     try {
-      // Try to load from PDF first
       const pdfDocs = await getChunkedDocsFromPDF();
       console.log(`Successfully loaded ${pdfDocs.length} chunks from PDF`);
       await this.embedAndStoreDocs(pdfDocs);
       return;
     } catch (pdfError) {
-      console.error("Failed to load PDF, falling back to default docs:", pdfError);
+      console.error(
+        "Failed to load PDF, falling back to default docs:",
+        pdfError
+      );
     }
 
-    // Fallback to default documents if PDF loading fails
-    const defaultDocs = [
-      new Document({
-        pageContent:
-          "A stack is a linear data structure that follows the Last In First Out (LIFO) principle. Elements are added and removed from the same end, called the top of the stack. Common operations include push (add element), pop (remove element), and peek (view top element without removing). Stacks are used in function calls, expression evaluation, and undo operations.",
-        metadata: { source: "default", topic: "stack" },
-      }),
-      new Document({
-        pageContent:
-          "A queue is a linear data structure that follows the First In First Out (FIFO) principle. Elements are added at the rear (enqueue) and removed from the front (dequeue). It's like a line of people waiting - first person in line gets served first. Queues are used in breadth-first search, task scheduling, and buffering.",
-        metadata: { source: "default", topic: "queue" },
-      }),
-      new Document({
-        pageContent:
-          "Arrays are data structures that store elements in contiguous memory locations. They provide constant time O(1) access to elements using indices. Arrays have fixed size in many programming languages. Random access is their main advantage, but insertion and deletion can be expensive O(n) operations.",
-        metadata: { source: "default", topic: "array" },
-      }),
-      new Document({
-        pageContent:
-          "Linked lists are dynamic data structures where elements (nodes) are stored in sequence, but not necessarily in contiguous memory. Each node contains data and a pointer to the next node. Types include singly linked, doubly linked, and circular linked lists. They allow efficient insertion and deletion but require O(n) time for search.",
-        metadata: { source: "default", topic: "linked-list" },
-      }),
-      new Document({
-        pageContent:
-          "Binary trees are hierarchical data structures where each node has at most two children, referred to as left and right child. Tree traversal methods include inorder, preorder, and postorder. Binary search trees maintain a sorted order where left children are smaller and right children are larger than the parent.",
-        metadata: { source: "default", topic: "binary-tree" },
-      }),
-      new Document({
-        pageContent:
-          "Hash tables (hash maps) provide average O(1) time complexity for search, insertion, and deletion operations. They use a hash function to compute an index into an array of buckets. Collision resolution techniques include chaining and open addressing. Hash tables are widely used in database indexing and caching.",
-        metadata: { source: "default", topic: "hash-table" },
-      }),
-    ];
-
-    await this.embedAndStoreDocs(defaultDocs);
+    // Final fallback to default documents
+    const docs = DEFAULT_DS_DOCUMENTS.map((doc) => new Document(doc));
+    await this.embedAndStoreDocs(docs);
   }
 
   // Search for similar documents

@@ -17,17 +17,53 @@ export async function callChain({ question, chatHistory }: callChainArgs) {
 
     // Check if question is related to DS&A
     const dsaKeywords = [
-      "stack", "queue", "array", "tree", "graph", "algorithm", "data structure",
-      "sort", "search", "binary", "heap", "hash", "linked list", "pointer",
-      "recursion", "iteration", "complexity", "time complexity", "space complexity",
-      "big o", "o(n)", "lifo", "fifo", "push", "pop", "enqueue", "dequeue",
-      "traversal", "insertion", "deletion", "node", "vertex", "edge", "path",
-      "bubble sort", "quick sort", "merge sort", "binary search", "dfs", "bfs",
-      "dynamic programming", "greedy", "divide and conquer"
+      "stack",
+      "queue",
+      "array",
+      "tree",
+      "graph",
+      "algorithm",
+      "data structure",
+      "sort",
+      "search",
+      "binary",
+      "heap",
+      "hash",
+      "linked list",
+      "pointer",
+      "recursion",
+      "iteration",
+      "complexity",
+      "time complexity",
+      "space complexity",
+      "big o",
+      "o(n)",
+      "lifo",
+      "fifo",
+      "push",
+      "pop",
+      "enqueue",
+      "dequeue",
+      "traversal",
+      "insertion",
+      "deletion",
+      "node",
+      "vertex",
+      "edge",
+      "path",
+      "bubble sort",
+      "quick sort",
+      "merge sort",
+      "binary search",
+      "dfs",
+      "bfs",
+      "dynamic programming",
+      "greedy",
+      "divide and conquer",
     ];
 
     const questionLower = sanitizedQuestion.toLowerCase();
-    const isDSARelated = dsaKeywords.some(keyword => 
+    const isDSARelated = dsaKeywords.some((keyword) =>
       questionLower.includes(keyword.toLowerCase())
     );
 
@@ -46,7 +82,8 @@ export async function callChain({ question, chatHistory }: callChainArgs) {
     console.log("Context found:", context.length > 0 ? "Yes" : "No");
 
     // Generate response using Gemini LLM
-    let responseText = "I can help you with Data Structures and Algorithms questions.";
+    let responseText =
+      "I can help you with Data Structures and Algorithms questions.";
 
     if (context.length > 0) {
       try {
@@ -63,25 +100,28 @@ Please provide a clear, educational explanation based on the context above. If t
 Answer:`;
 
         console.log("Generating LLM response...");
-        
+
         // Use Google Generative AI directly
         const genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-        
+
         const result = await model.generateContent(prompt);
         const response = await result.response;
         responseText = response.text();
-        
+
         console.log("LLM response generated successfully");
-        
       } catch (llmError) {
         console.error("LLM generation failed:", llmError);
-        
+
         // Fallback to formatted context response
-        responseText = `Based on the DS&A materials:\n\n${context.substring(0, 800)}${context.length > 800 ? "..." : ""}`;
+        responseText = `Based on the DS&A materials:\n\n${context.substring(
+          0,
+          800
+        )}${context.length > 800 ? "..." : ""}`;
       }
     } else {
-      responseText = "I couldn't find relevant information in the DS&A materials for your question. Could you please rephrase or ask about a specific data structure or algorithm topic?";
+      responseText =
+        "I couldn't find relevant information in the DS&A materials for your question. Could you please rephrase or ask about a specific data structure or algorithm topic?";
     }
 
     // Return structured response

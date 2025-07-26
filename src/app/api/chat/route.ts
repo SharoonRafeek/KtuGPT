@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { callChain } from "@/lib/langchain";
 import { Message } from "ai";
+import { StreamingTextResponse } from "ai";
 
 const formatMessage = (message: Message) => {
   return `${message.role === "user" ? "Human" : "Assistant"}: ${
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
   console.log("Chat history ", formattedPreviousMessages.join("\n"));
 
   if (!question) {
-    return NextResponse.json("Error: No question in the request", {
+    return new Response("Error: No question in the request", {
       status: 400,
     });
   }
@@ -29,15 +30,20 @@ export async function POST(req: NextRequest) {
       chatHistory: formattedPreviousMessages.join("\n"),
     });
 
-    // Return plain text response instead of JSON
-    return new NextResponse(result.text, {
-      headers: {
-        "Content-Type": "text/plain",
+    // Create a simple streaming response that works with useChat
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      start(controller) {
+        // Send the text content
+        controller.enqueue(encoder.encode(result.text));
+        controller.close();
       },
     });
+
+    return new StreamingTextResponse(stream);
   } catch (error) {
     console.error("Internal server error ", error);
-    return NextResponse.json("Error: Something went wrong. Try again!", {
+    return new Response("Error: Something went wrong. Try again!", {
       status: 500,
     });
   }
