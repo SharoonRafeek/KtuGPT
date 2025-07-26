@@ -24,12 +24,17 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const streamingTextResponse = callChain({
+    const result = await callChain({
       question,
       chatHistory: formattedPreviousMessages.join("\n"),
     });
 
-    return streamingTextResponse;
+    // Return plain text response instead of JSON
+    return new NextResponse(result.text, {
+      headers: {
+        "Content-Type": "text/plain",
+      },
+    });
   } catch (error) {
     console.error("Internal server error ", error);
     return NextResponse.json("Error: Something went wrong. Try again!", {

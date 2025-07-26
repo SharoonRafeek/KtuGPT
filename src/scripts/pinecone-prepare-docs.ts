@@ -1,18 +1,17 @@
-import { getChunkedDocsFromPDF } from "@/lib/pdf-loader";
-import { embedAndStoreDocs } from "@/lib/vector-store";
-import { getPineconeClient } from "@/lib/pinecone-client";
+import { config } from "dotenv";
+config({ path: ".env.local" });
 
-// This operation might fail because indexes likely need
-// more time to init, so give some 5 mins after index
-// creation and try again.
+import { getChunkedDocsFromPDF } from "@/lib/pdf-loader";
+import { embedAndStoreDocs } from "@/lib/chroma-vector-store";
+
+// This operation will prepare and store documents in Chroma
 (async () => {
   try {
-    const pineconeClient = await getPineconeClient();
     console.log("Preparing chunks from PDF file");
     const docs = await getChunkedDocsFromPDF();
-    console.log(`Loading ${docs.length} chunks into pinecone...`);
-    await embedAndStoreDocs(pineconeClient, docs);
-    console.log("Data embedded and stored in pine-cone index");
+    console.log(`Loading ${docs.length} chunks into Chroma...`);
+    await embedAndStoreDocs(docs);
+    console.log("Data embedded and stored in Chroma database");
   } catch (error) {
     console.error("Init client script failed ", error);
   }

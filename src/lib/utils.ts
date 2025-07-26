@@ -1,4 +1,4 @@
-import { ChatGPTMessage } from "@/types";
+import { ChatMessage } from "@/types";
 import { Message } from "ai";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -47,7 +47,7 @@ export const initialMessages: Message[] = [
     role: "assistant",
     id: "0",
     content:
-      "Hi! I am KtuGPT. I am happy to help with your questions about Data Structure and Algorithms.",
+      "Hi! I am KtuGPT powered by Gemini 2.0 Flash. I am happy to help with your questions about Data Structure and Algorithms.",
   },
 ];
 
